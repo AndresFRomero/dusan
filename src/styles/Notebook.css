@@ -1,0 +1,11 @@
+.first_block {
+    background-color: rgba(242, 241, 238);
+    position: fixed;
+    width: 35%;
+    min-height: 100vh;
+    height: 100%;
+    border-right: 1px groove;
+    z-index:-1;
+    top: 0;
+    left: 0;
+}
