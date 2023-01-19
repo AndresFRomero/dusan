@@ -3,13 +3,12 @@ import '../styles/Notebook.css'
 
 import {
     Box, Paper, Typography, Button,
-    IconButton, TextField, Backdrop
+    IconButton, TextField, Backdrop, FormControl
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ForwardIcon from '@mui/icons-material/Forward';
-import EditIcon from '@mui/icons-material/Edit';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -18,15 +17,23 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Autocomplete from '@mui/material/Autocomplete';
+import InputAdornment from '@mui/material/InputAdornment';
 
-import { useState, useEffect } from 'react';
-import { render } from '@testing-library/react';
+import { useState } from 'react';
 
-function currencyFormat(num) {
-    if (num) {   
-        return '$' + Number(num).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
-    }
-    return null
+function currencyFormat(num) { 
+    return '$' + Number(num).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+}
+
+const noobProduct = {
+    "nombre": "",
+    "ancho": "",
+    "largo": "",
+    "unidades": "",
+    "precio": "",
+    "sub_total": "",
+    "precio_lamina": "",
+    "precio_m2": ""
 }
 
 const timeOptions = {
@@ -50,7 +57,7 @@ var pedidos = [{
 }]
 
 const inventario = [
-    { "nombre": "Azul Reflectivo", "costo": 17000, "precio_lamina": 20000, "precio_m2": 50000 },
+    { "nombre": "Azul Reflectivo", "ancho": 50, "largo": 50, "costo": 17000, "precio_lamina": 20000, "precio_m2": 50000 },
     { "nombre": "Un nombre muy largo, asi es","costo": 15000, "precio_lamina": 20000, "precio_m2": 50000 },
     { "nombre": "Azul Transparente", "costo": 17000, "precio_lamina": 20000, "precio_m2": 50000 },
     { "nombre": "Verde Esmerilado", "costo": 21000, "precio_lamina": 40000, "precio_m2": 10000 }
@@ -82,14 +89,17 @@ const Notebook = () => {
         }
         pedidos = [...pedidos, fullNewOrder]
         setAddOrder(!addOrder)
+        setNewOrder([])
     }
 
     const handleCloseNewOrder = (e) => {
         e.preventDefault()
         setAddOrder(!addOrder)
+        setNewOrder([])
     }
 
     const handleSelectProduct = (e, idx, newValue) => {
+        console.log(idx, newValue)
         const productToAdd = {
             "nombre": newValue.nombre,
             "largo": newValue.largo,
@@ -106,6 +116,13 @@ const Notebook = () => {
             updateNewOrder[idx] = productToAdd
             setNewOrder(updateNewOrder)
         }
+    }
+
+    const handleChangeProductData = (e, idx, attr) => {
+        const actu = [...newOrder]
+        console.log(actu)
+        actu[idx][attr] = e.target.value
+        setNewOrder(actu)
     }
 
     return (
@@ -128,7 +145,7 @@ const Notebook = () => {
                     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                     open={addOrder}
                 >
-                    <Paper sx={{p:2, width: 800}} elevation={5}>
+                    <Paper sx={{p:2, width: '70%', maxHeight: '70vh', overflow:'auto'}} elevation={5}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                 <TextField
@@ -142,34 +159,67 @@ const Notebook = () => {
                             </Box>
                         </Box>
                         {/* Posible products */}
-                        <TableContainer sx={{ mt: 2 }}>
+                        <TableContainer sx={{ mt: 2}}>
                             <Table size='small'>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell sx={{width: '70%'}} align='left'>Producto</TableCell>
+                                        <TableCell sx={{minWidth:400, flexGrow:1}} align='left'>Producto</TableCell>
                                         <TableCell align='center'>Ancho</TableCell>
                                         <TableCell align='center'>Largo</TableCell>
-                                        <TableCell align='right'>Precio</TableCell>
+                                        <TableCell align='center'>Precio</TableCell>
                                         <TableCell align='center'>Uds</TableCell>
                                         <TableCell align='right'>SubTotal</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                {[...newOrder,{}].map((producto, idx) =>
+                                {[...newOrder,noobProduct].map((producto, idx) =>
                                     <TableRow key={idx}>
-                                        <TableCell align='left'>
+                                        <TableCell align='left' sx={{border:0}}>
                                             <Autocomplete
                                                 {...defaultProps}
-                                                size="small"
+                                                freeSolo
+                                                renderInput={(params) => <TextField {...params} label="" />}
                                                 onChange={(e, newValue) => handleSelectProduct(e,idx,newValue)}
-                                                renderInput={(params) => <TextField {...params} />}
+                                                size="small"
                                             />
                                         </TableCell>
-                                        <TableCell align='center'>{producto.ancho}</TableCell>
-                                        <TableCell align='center'>{producto.largo}</TableCell>
-                                        <TableCell align='right'>{currencyFormat(producto.precio)}</TableCell>
-                                        <TableCell align='center'>{producto.unidades}</TableCell>
-                                        <TableCell componalign='right'>{currencyFormat(producto.sub_total)}</TableCell>
+                                        <TableCell align='center' sx={{border:0}}>
+                                            <TextField
+                                                value={producto.ancho}
+                                                onChange={(e) => handleChangeProductData(e, idx, "ancho")}
+                                                size="small"
+                                            >
+                                            </TextField>
+                                        </TableCell>
+                                        <TableCell align='center' sx={{border:0}}>
+                                            <TextField
+                                                value={producto.largo}
+                                                onChange={(e) => handleChangeProductData(e, idx, "largo")}
+                                                size="small"
+                                            >
+                                            </TextField>
+                                        </TableCell>
+                                        <TableCell align='center' sx={{border:0}}>
+                                            <TextField
+                                                value={producto.precio}
+                                                InputProps={{
+                                                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                                }}
+                                                onChange={(e) => handleChangeProductData(e, idx, "precio")}
+                                                size="small"
+                                            >
+                                            </TextField>
+                                        </TableCell>
+                                        <TableCell align='center' sx={{border:0}}>
+                                            <TextField
+                                                value={producto.unidades}
+                                                onChange={(e) => handleChangeProductData(e, idx, "unidades")}
+                                                size="small"
+                                                >
+                                            </TextField>
+                                        </TableCell>
+                                        <TableCell align='right' sx={{border:0}}>
+                                            {currencyFormat(producto.sub_total)}</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
@@ -200,9 +250,6 @@ const Notebook = () => {
                                 <Box>
                                     <IconButton>
                                         <DeleteIcon></DeleteIcon>
-                                    </IconButton>
-                                    <IconButton>
-                                        <EditIcon></EditIcon>
                                     </IconButton>
                                     <IconButton>
                                         <CheckCircleIcon></CheckCircleIcon>
